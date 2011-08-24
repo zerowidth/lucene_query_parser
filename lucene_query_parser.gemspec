@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = LuceneQueryParser::VERSION
   s.authors     = ["Nathan Witmer"]
   s.email       = ["nwitmer@gmail.com"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.homepage    = "https://github.com/aniero/lucene_query_parser"
+  s.summary     = %q{Lucene query parser and syntax checker}
+  s.description = %q{Parser class and syntax checking script for validating Lucene queries}
 
   s.rubyforge_project = "lucene_query_parser"
 
