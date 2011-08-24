@@ -15,13 +15,14 @@ module LuceneQueryParser
     rule :operand do
       unary_operator.maybe >> (
         group |
+        field |
         term |
         phrase
       )
     end
 
     rule :term do
-      match["\\w'"].repeat(1).as(:term)
+      match["\\w'"].repeat(1).as(:term) >> fuzzy.maybe
     end
 
     rule :phrase do
@@ -37,10 +38,19 @@ module LuceneQueryParser
       str('(') >> space.maybe >> expr.as(:group) >> space.maybe >> str(')')
     end
 
+    rule :field do
+      match["\\w"].repeat(1).as(:field) >> str(':') >> (term | phrase | group)
+    end
+
     rule :unary_operator do
       str('+').as(:required) |
       str('-').as(:prohibited) |
       (str('NOT').as(:op) >> space)
+    end
+
+    rule :fuzzy do
+      str('~').as(:fuzzy) >>
+      ( match['01'] | str('0.') >> match['0-9'].repeat(1) ).maybe.as(:similarity)
     end
 
     rule :space do

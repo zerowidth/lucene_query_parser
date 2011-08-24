@@ -87,7 +87,10 @@ describe LuceneQueryParser::Parser do
     end
 
     it "parses AND groupings" do
-      should parse(%q(foo AND bar)).as [{:term => "foo"}, {:op => "AND", :term => "bar"}]
+      should parse(%q(foo AND bar)).as [
+        {:term => "foo"},
+        {:op => "AND", :term => "bar"}
+      ]
     end
 
     it "parses a sequence of AND and OR" do
@@ -106,7 +109,53 @@ describe LuceneQueryParser::Parser do
       ]
     end
 
+    it "parses field:value" do
+      should parse("title:foo", :trace => true).as(
+        {:field => "title", :term => "foo"}
+      )
+    end
+
+    it 'parses field:"a phrase"' do
+      should parse('title:"a phrase"').as(
+        {:field => "title", :phrase => "a phrase"}
+      )
+    end
+
+    it "parses field:(foo AND bar)" do
+      should parse('title:(foo AND bar)').as(
+        {:field => "title", :group => [
+          {:term => "foo"},
+          {:op => "AND", :term => "bar"}
+        ]}
+      )
+    end
+
+    it "parses fuzzy terms" do
+      should parse('fuzzy~').as(
+        {:term => "fuzzy", :fuzzy => "~", :similarity => nil}
+      )
+    end
+
+    it "parses a fuzzy similarity of 0" do
+      should parse('fuzzy~0').as(
+        {:term => "fuzzy", :fuzzy => "~", :similarity => "0"}
+      )
+    end
+
+    it "parses a fuzzy similarity of 1" do
+      should parse('fuzzy~1').as(
+        {:term => "fuzzy", :fuzzy => "~", :similarity => "1"}
+      )
+    end
+
+    it "parses a fuzzy similarity of 0.8" do
+      should parse('fuzzy~0.8').as(
+        {:term => "fuzzy", :fuzzy => "~", :similarity => "0.8"}
+      )
+    end
+
+
+
   end
 
 end
-
