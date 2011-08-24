@@ -1,5 +1,33 @@
 module LuceneQueryParser
   class Parser < Parslet::Parser
+
+    # Public: find and explain the errors in a query
+    #
+    # query - the query to check
+    #
+    # Returns nil if the query is parseable, or a hash containing information
+    # about the invalid query if not.
+    def error_location(query)
+      parse query
+      nil
+    rescue Parslet::ParseFailed => error
+      cause = find_cause root.error_tree
+      cause =~ /line (\d+) char (\d+)/
+      {:line => $1.to_i, :column => $2.to_i, :message => cause}
+    end
+
+    def find_cause(node)
+      if node.parslet.cause
+        node.cause
+      else
+        node.children.reverse.each do |child|
+          if cause = find_cause(child)
+            return cause
+          end
+        end
+      end
+    end
+
     root :expr
 
     rule :expr do

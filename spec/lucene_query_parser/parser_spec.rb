@@ -177,4 +177,19 @@ describe LuceneQueryParser::Parser do
 
   end
 
+  describe "#error_location" do
+    let(:parser) { LuceneQueryParser::Parser.new }
+
+    it "returns nil for a valid query" do
+      parser.error_location("valid query").should be_nil
+    end
+
+    it "returns a hash with the line and column for an invalid query" do
+      error = parser.error_location("invalid^ query")
+      error[:line].should == 1
+      error[:column].should == 8
+      error[:message].should =~ /Expected/
+    end
+  end
+
 end
