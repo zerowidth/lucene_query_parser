@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+require "lucene_query_parser"
+require "rainbow"
+
+if ARGV.include?("-h") || ARGV.include?("--help")
+  name = __FILE__
+  puts <<-help
+NAME
+
+    #{name} - check lucene query syntax
+
+SYNOPSIS
+
+    #{name} <filename>
+
+ARGUMENTS
+
+    <filename>
+        a file containing a lucene query to parse and validate
+        use '-' to read from STDIN
+
+EXAMPLES
+
+    Check a file containing a query:
+
+      #{name} file_with_query.txt
+
+    Check the contents of the clipboard (mac):
+
+      pbpaste | #{name} -
+
+  help
+  exit -1
+end
+
+input = nil
+
+if input_file = ARGV[0]
+  if input_file == "-"
+    input = STDIN.read
+  else
+    input = File.read input_file
+  end
+else
+  abort "please provide a filename to check or '-' for STDIN"
+end
+
+parser = LuceneQueryParser::Parser.new
+
+
+location = parser.error_location(input)
+if location
+  puts location[:message].color(:yellow)
+  puts
+
+  lines = input.split("\n")
+  lines.each_with_index do |line, i|
+    if i + 1 == location[:line]
+      col = location[:column]
+      print line[0,col-1]
+      print line[col-1, 1].color(:red).background(:yellow)
+      puts line[col..-1]
+    else
+      puts line
+    end
+  end
+
+  puts
+
+  exit -1 # query not ok
+
+else
+  puts "query ok".color(:green)
+end
+

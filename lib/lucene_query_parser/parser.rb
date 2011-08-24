@@ -1,7 +1,7 @@
 module LuceneQueryParser
   class Parser < Parslet::Parser
 
-    # Public: find and explain the errors in a query
+    # Public: find and explain errors in a query, if any
     #
     # query - the query to check
     #
@@ -16,10 +16,13 @@ module LuceneQueryParser
       {:line => $1.to_i, :column => $2.to_i, :message => cause}
     end
 
+    # Recursively find a "real" cause within a Parslet error tree. "Real"
+    # causes contain line/column positions.
     def find_cause(node)
       if node.parslet.cause
         node.cause
       else
+        # go in reverse to find the last thing that failed rather than the first
         node.children.reverse.each do |child|
           if cause = find_cause(child)
             return cause
@@ -27,6 +30,8 @@ module LuceneQueryParser
         end
       end
     end
+
+    # ----- grammar definition -----
 
     root :expr
 

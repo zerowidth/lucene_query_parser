@@ -19,5 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency "parslet"
+  s.add_runtime_dependency "rainbow"
   s.add_development_dependency "rspec", "~> 2.5.0"
 end
