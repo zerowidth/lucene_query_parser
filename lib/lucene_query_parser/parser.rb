@@ -22,12 +22,12 @@ module LuceneQueryParser
     end
 
     rule :term do
-      match["\\w'"].repeat(1).as(:term) >> fuzzy.maybe
+      match["\\w'"].repeat(1).as(:term) >> (fuzzy | boost).maybe
     end
 
     rule :phrase do
-      str('"') >> match['^"'].repeat(1).as(:phrase) >> str('"') >> distance |
-      str('"') >> match['^"'].repeat(1).as(:phrase) >> str('"')
+      str('"') >> match['^"'].repeat(1).as(:phrase) >> str('"') >>
+      (distance | boost).maybe
     end
 
     rule :distance do
@@ -66,8 +66,15 @@ module LuceneQueryParser
     end
 
     rule :fuzzy do
-      str('~').as(:fuzzy) >>
+      str('~') >>
       ( str('0.') >> match['0-9'].repeat(1) | match['01'] ).maybe.as(:similarity)
+    end
+
+    rule :boost do
+      str('^') >> (
+        str('0.') >> match['0-9'].repeat(1) |
+        match['0-9'].repeat(1)
+      ).as(:boost)
     end
 
     rule :word do

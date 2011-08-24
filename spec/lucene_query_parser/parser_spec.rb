@@ -132,25 +132,25 @@ describe LuceneQueryParser::Parser do
 
     it "parses fuzzy terms" do
       should parse('fuzzy~').as(
-        {:term => "fuzzy", :fuzzy => "~", :similarity => nil}
+        {:term => "fuzzy", :similarity => nil}
       )
     end
 
     it "parses a fuzzy similarity of 0" do
       should parse('fuzzy~0').as(
-        {:term => "fuzzy", :fuzzy => "~", :similarity => "0"}
+        {:term => "fuzzy", :similarity => "0"}
       )
     end
 
     it "parses a fuzzy similarity of 1" do
       should parse('fuzzy~1').as(
-        {:term => "fuzzy", :fuzzy => "~", :similarity => "1"}
+        {:term => "fuzzy", :similarity => "1"}
       )
     end
 
     it "parses a fuzzy similarity of 0.8" do
       should parse('fuzzy~0.8').as(
-        {:term => "fuzzy", :fuzzy => "~", :similarity => "0.8"}
+        {:term => "fuzzy", :similarity => "0.8"}
       )
     end
 
@@ -161,6 +161,19 @@ describe LuceneQueryParser::Parser do
     it { should parse('year:{2009 TO 2012}').as(
       {:field => "year", :exclusive_range => {:from => "2009", :to => "2012"}}
     ) }
+
+    it { should parse('boosted^1').as({:term => "boosted", :boost => "1"})}
+    it { should parse('boosted^0.1').as({:term => "boosted", :boost => "0.1"})}
+
+    it { should parse('boosted^10 normal').as([
+      {:term => "boosted", :boost => "10"},
+      {:term => "normal"}
+    ])}
+
+    it { should parse('"boosted phrase"^10 "normal phrase"').as([
+      {:phrase => "boosted phrase", :boost => "10"},
+      {:phrase => "normal phrase"}
+    ])}
 
   end
 
