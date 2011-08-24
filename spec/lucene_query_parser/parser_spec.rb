@@ -110,7 +110,7 @@ describe LuceneQueryParser::Parser do
     end
 
     it "parses field:value" do
-      should parse("title:foo", :trace => true).as(
+      should parse("title:foo").as(
         {:field => "title", :term => "foo"}
       )
     end
@@ -154,7 +154,13 @@ describe LuceneQueryParser::Parser do
       )
     end
 
+    it { should parse('year:[2010 TO 2011]').as(
+      {:field => "year", :inclusive_range => {:from => "2010", :to => "2011"}}
+    ) }
 
+    it { should parse('year:{2009 TO 2012}').as(
+      {:field => "year", :exclusive_range => {:from => "2009", :to => "2012"}}
+    ) }
 
   end
 

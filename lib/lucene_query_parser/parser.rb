@@ -39,7 +39,24 @@ module LuceneQueryParser
     end
 
     rule :field do
-      match["\\w"].repeat(1).as(:field) >> str(':') >> (term | phrase | group)
+      match["\\w"].repeat(1).as(:field) >> str(':') >>
+      (
+        term | phrase | group |
+        inclusive_range.as(:inclusive_range) |
+        exclusive_range.as(:exclusive_range)
+      )
+    end
+
+    rule :inclusive_range do
+      str('[') >> space.maybe >>
+      word.as(:from) >> space >> str('TO') >> space >> word.as(:to) >>
+      space.maybe >> str(']')
+    end
+
+    rule :exclusive_range do
+      str('{') >> space.maybe >>
+      word.as(:from) >> space >> str('TO') >> space >> word.as(:to) >>
+      space.maybe >> str('}')
     end
 
     rule :unary_operator do
@@ -50,7 +67,11 @@ module LuceneQueryParser
 
     rule :fuzzy do
       str('~').as(:fuzzy) >>
-      ( match['01'] | str('0.') >> match['0-9'].repeat(1) ).maybe.as(:similarity)
+      ( str('0.') >> match['0-9'].repeat(1) | match['01'] ).maybe.as(:similarity)
+    end
+
+    rule :word do
+      match["\\w"].repeat(1)
     end
 
     rule :space do
