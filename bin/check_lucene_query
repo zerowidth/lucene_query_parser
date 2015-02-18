@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require "lucene_query_parser"
-require "rainbow"
+require 'rainbow/ext/string'  # not recommended but live dangerously
 
 if ARGV.include?("-h") || ARGV.include?("--help")
   name = __FILE__
