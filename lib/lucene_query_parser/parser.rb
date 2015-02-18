@@ -11,24 +11,9 @@ module LuceneQueryParser
       parse query
       nil
     rescue Parslet::ParseFailed => error
-      cause = find_cause root.error_tree
+      cause = error.cause.ascii_tree
       cause =~ /line (\d+) char (\d+)/
       {:line => $1.to_i, :column => $2.to_i, :message => cause}
-    end
-
-    # Recursively find a "real" cause within a Parslet error tree. "Real"
-    # causes contain line/column positions.
-    def find_cause(node)
-      if node.parslet.cause
-        node.cause
-      else
-        # go in reverse to find the last thing that failed rather than the first
-        node.children.reverse.each do |child|
-          if cause = find_cause(child)
-            return cause
-          end
-        end
-      end
     end
 
     # ----- grammar definition -----
