@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/aniero/lucene_query_parser"
   s.summary     = %q{Lucene query parser and syntax checker}
   s.description = %q{Parser class and syntax checking script for validating Lucene queries}
+  s.licenses    = ["MIT"]
 
   s.rubyforge_project = "lucene_query_parser"
 
