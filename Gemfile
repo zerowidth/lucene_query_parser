@@ -7,7 +7,7 @@ group "development" do
   gem "guard"
   gem "guard-rspec"
 
-  if PLATFORM =~ /darwin/
+  if RUBY_PLATFORM =~ /darwin/
     gem "rb-fsevent"
     gem "growl_notify"
   end
