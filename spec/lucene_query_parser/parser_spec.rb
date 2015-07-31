@@ -157,9 +157,21 @@ describe LuceneQueryParser::Parser do
     it { should parse('year:[2010 TO 2011]').as(
       {:field => "year", :inclusive_range => {:from => "2010", :to => "2011"}}
     ) }
+    it { should parse('month:[6 TO *]').as(
+      {:field => "month", :inclusive_range => {:from => "6", :to => "*"}}
+    ) }
+    it { should parse('day:[* TO 10]').as(
+      {:field => "day", :inclusive_range => {:from => "*", :to => "10"}}
+    ) }
 
     it { should parse('year:{2009 TO 2012}').as(
       {:field => "year", :exclusive_range => {:from => "2009", :to => "2012"}}
+    ) }
+    it { should parse('month:{* TO 5}').as(
+      {:field => "month", :exclusive_range => {:from => "*", :to => "5"}}
+    ) }
+    it { should parse('day:{11 TO *}').as(
+      {:field => "day", :exclusive_range => {:from => "11", :to => "*"}}
     ) }
 
     it { should parse('boosted^1').as({:term => "boosted", :boost => "1"})}
