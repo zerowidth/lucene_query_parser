@@ -67,14 +67,14 @@ module LuceneQueryParser
 
     rule :inclusive_range do
       str('[') >> space.maybe >>
-      (word | range_wildcard).as(:from) >> space >> str('TO') >> space >> 
-      (word | range_wildcard).as(:to) >> space.maybe >> str(']')
+      (range_word | range_wildcard).as(:from) >> space >> str('TO') >> space >>
+      (range_word | range_wildcard).as(:to) >> space.maybe >> str(']')
     end
 
     rule :exclusive_range do
       str('{') >> space.maybe >>
-      (word | range_wildcard).as(:from) >> space >> str('TO') >> space >> 
-      (word | range_wildcard).as(:to) >> space.maybe >> str('}')
+      (range_word | range_wildcard).as(:from) >> space >> str('TO') >> space >>
+      (range_word | range_wildcard).as(:to) >> space.maybe >> str('}')
     end
 
     rule :unary_operator do
@@ -101,6 +101,10 @@ module LuceneQueryParser
 
     rule :word do
       match["\\w"].repeat(1)
+    end
+
+    rule :range_word do
+      match["0-9a-z\\-."].repeat(1)
     end
 
     rule :space do
