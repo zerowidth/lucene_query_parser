@@ -16,6 +16,22 @@ module LuceneQueryParser
       {:line => $1.to_i, :column => $2.to_i, :message => cause}
     end
 
+    # Public: constructor takes optional named pairs,
+    # including:
+    #
+    #   :term_re => string    # regex string for matching term
+    #
+    def initialize(args={})
+      @term_re = args[:term_re] || "\\w'"
+      term_re_str = @term_re.to_s  # in case passed as actual Regexp
+
+      # must define :term rule at run-time so that it can include
+      # the term_re_str
+      self.class.rule :term do
+        match[term_re_str].repeat(1).as(:term) >> (fuzzy | boost).maybe
+      end
+    end
+
     # ----- grammar definition -----
 
     root :expr
@@ -39,10 +55,6 @@ module LuceneQueryParser
       )
     end
 
-    rule :term do
-      match["\\w'"].repeat(1).as(:term) >> (fuzzy | boost).maybe
-    end
-
     rule :phrase do
       str('"') >> match['^"'].repeat(1).as(:phrase) >> str('"') >>
       (distance | boost).maybe
@@ -57,7 +69,7 @@ module LuceneQueryParser
     end
 
     rule :field do
-      match["\\w"].repeat(1).as(:field) >> str(':') >>
+      match["\\w\\."].repeat(1).as(:field) >> str(':') >>
       (
         term | phrase | group |
         inclusive_range.as(:inclusive_range) |

@@ -1,0 +1,12 @@
+Changelog for lucene_query_parser
+
+0.0.3
+  - added optional term_re regexp support to constructor,
+    so that the Parser can match terms with wildcards, hyphens or whatever
+    character classes best fit the specific use case.
+
+0.0.2
+  - updated to work with newer Parslet and Rspec
+
+0.0.1 
+  - initial release
