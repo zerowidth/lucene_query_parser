@@ -174,6 +174,22 @@ describe LuceneQueryParser::Parser do
       {:field => "day", :exclusive_range => {:from => "11", :to => "*"}}
     ) }
 
+    it { should parse('foo:[0.5 TO 1]').as(
+      {:field => "foo", :inclusive_range => {:from => "0.5", :to => "1"}}
+    ) }
+
+    it { should parse('foo:[2015-05-05 TO 2015-06-06]').as(
+      {:field => "foo", :inclusive_range => {:from => "2015-05-05", :to => "2015-06-06"}}
+    ) }
+
+    it { should parse('foo:{0.5 TO 1}').as(
+      {:field => "foo", :exclusive_range => {:from => "0.5", :to => "1"}}
+    ) }
+
+    it { should parse('foo:{2015-05-05 TO 2015-06-06}').as(
+      {:field => "foo", :exclusive_range => {:from => "2015-05-05", :to => "2015-06-06"}}
+    ) }
+
     it { should parse('boosted^1').as({:term => "boosted", :boost => "1"})}
     it { should parse('boosted^0.1').as({:term => "boosted", :boost => "0.1"})}
 
