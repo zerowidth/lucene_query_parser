@@ -136,6 +136,12 @@ describe LuceneQueryParser::Parser do
       )
     end
 
+    it "parses wildcard terms" do
+      should parse('fuzzy*').as(
+        {:term => "fuzzy", :wildcard => "*"}
+      )
+    end
+
     it "parses a fuzzy similarity of 0" do
       should parse('fuzzy~0').as(
         {:term => "fuzzy", :similarity => "0"}

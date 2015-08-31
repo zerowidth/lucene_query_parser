@@ -40,7 +40,7 @@ module LuceneQueryParser
     end
 
     rule :term do
-      match["\\w'"].repeat(1).as(:term) >> (fuzzy | boost).maybe
+      match["\\w'"].repeat(1).as(:term) >> (fuzzy | boost | wildcard ).maybe
     end
 
     rule :phrase do
@@ -97,6 +97,11 @@ module LuceneQueryParser
 
     rule :range_wildcard do
       match["*"].repeat(1)
+    end
+
+
+    rule :wildcard do
+      str('*').as(:wildcard)
     end
 
     rule :word do
