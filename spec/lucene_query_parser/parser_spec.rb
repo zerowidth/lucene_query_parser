@@ -202,14 +202,20 @@ describe LuceneQueryParser::Parser do
       # uncomment to see error
       #show_err(q, parser.error_location(q))
 
-      # default should throw error
-      parser.error_location(q).should_not be_nil
+      # default should succeed
+      parser.error_location(q).should be_nil
 
       # with regex should succeed
       regex_parser = LuceneQueryParser::Parser.new(:term_re => "\\w\\.\\*\\-\\'")
       regex_parser.should parse('color:blue.green-orange*').as({
         :field => 'color', :term => 'blue.green-orange*'
       })
+    end
+
+    it "parses wildcard terms" do
+      should parse('fuzzy*').as(
+        {:term => "fuzzy*"}
+      )
     end
 
   end

@@ -22,13 +22,19 @@ module LuceneQueryParser
     #   :term_re => string    # regex string for matching term
     #
     def initialize(args={})
-      @term_re = args[:term_re] || "\\w'"
-      term_re_str = @term_re.to_s  # in case passed as actual Regexp
+      if args[:term_re]
+        @term_re = args[:term_re]
+        term_re_str = @term_re.to_s  # in case passed as actual Regexp
 
-      # must define :term rule at run-time so that it can include
-      # the term_re_str
-      self.class.rule :term do
-        match[term_re_str].repeat(1).as(:term) >> (fuzzy | boost).maybe
+        # must define :term rule at run-time so that it can include
+        # the term_re_str
+        self.class.rule :term do
+          match[term_re_str].repeat(1).as(:term) >> (fuzzy | boost).maybe
+        end
+      else
+        self.class.rule :term do
+          ( (escape_special_words | match["\\w\\'\\.\\*\\-"]).repeat(1) ).as(:term) >> (fuzzy | boost).maybe
+        end
       end
     end
 
@@ -53,6 +59,10 @@ module LuceneQueryParser
         term |
         phrase
       )
+    end
+
+    rule :escape_special_words do
+      (str('\\') >> match['^\\w']).repeat(1)
     end
 
     rule :phrase do
