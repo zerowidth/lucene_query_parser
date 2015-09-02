@@ -216,6 +216,9 @@ describe LuceneQueryParser::Parser do
       should parse('fuzzy*').as(
         {:term => "fuzzy*"}
       )
+      should parse('fu*zy').as( {:term => 'fu*zy'} )
+      should parse('fu?zy').as( {:term => 'fu?zy'} )
+      should parse('fo?').as( {:term => 'fo?'} )
     end
 
   end

@@ -33,7 +33,7 @@ module LuceneQueryParser
         end
       else
         self.class.rule :term do
-          ( (escape_special_words | match["\\w\\'\\.\\*\\-"]).repeat(1) ).as(:term) >> (fuzzy | boost).maybe
+          ( (escape_special_words | match["\\w\\'\\.\\*\\?\\-"]).repeat(1) ).as(:term) >> (fuzzy | boost).maybe
         end
       end
     end
