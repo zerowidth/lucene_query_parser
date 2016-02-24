@@ -1,4 +1,24 @@
 require "spec_helper"
+require 'rainbow/ext/string'
+
+def show_err(input, location)
+  STDERR.puts location[:message].color(:yellow)
+  STDERR.puts
+
+  lines = input.split("\n")
+  lines.each_with_index do |line, i|
+    if i + 1 == location[:line]
+      col = location[:column]
+      STDERR.print line[0,col-1]
+      STDERR.print line[col-1, 1].color(:red).background(:yellow)
+      STDERR.puts line[col..-1]
+    else
+      STDERR.puts line
+    end
+  end
+
+  STDERR.puts
+end
 
 describe LuceneQueryParser::Parser do
   let(:parser) { LuceneQueryParser::Parser.new }
@@ -20,7 +40,8 @@ describe LuceneQueryParser::Parser do
     end
 
     it "parses a phrase and two terms" do
-      should parse(%q("foo bar" isn't one)).as [
+      q = %q("foo bar" isn't one)
+      should parse(q).as [
         {:phrase => "foo bar"},
         {:term => "isn't"},
         {:term => "one"}
@@ -202,6 +223,31 @@ describe LuceneQueryParser::Parser do
       {:phrase => "boosted phrase", :boost => "10"},
       {:phrase => "normal phrase"}
     ])}
+
+    it "parses terms according to a regex" do
+      q = 'color:blue.green-orange*'
+
+      # uncomment to see error
+      #show_err(q, parser.error_location(q))
+
+      # default should succeed
+      parser.error_location(q).should be_nil
+
+      # with regex should succeed
+      regex_parser = LuceneQueryParser::Parser.new(:term_re => "\\w\\.\\*\\-\\'")
+      regex_parser.should parse('color:blue.green-orange*').as({
+        :field => 'color', :term => 'blue.green-orange*'
+      })
+    end
+
+    it "parses wildcard terms" do
+      should parse('fuzzy*').as(
+        {:term => "fuzzy*"}
+      )
+      should parse('fu*zy').as( {:term => 'fu*zy'} )
+      should parse('fu?zy').as( {:term => 'fu?zy'} )
+      should parse('fo?').as( {:term => 'fo?'} )
+    end
 
   end
 
