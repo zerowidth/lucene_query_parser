@@ -148,6 +148,34 @@ describe LuceneQueryParser::Parser do
       ]
     end
 
+    it "parses negation in terms" do
+      should parse("foo !bar").as [
+        {:term => "foo"},
+        {:term => "bar", :prohibited => "!"}
+      ]
+    end
+
+    it "parses negation in groupings" do
+      should parse('!(foo bar)^5').as(
+        {:group => [{:term => "foo"}, {:term => "bar"}], :prohibited => "!", :boost => "5"}
+      )
+    end
+
+    it "parses negation in phrases" do
+      q = %q(!"foo bar" isn't one)
+      should parse(q).as [
+        {:phrase => "foo bar", :prohibited => "!"},
+        {:term => "isn't"},
+        {:term => "one"}
+      ]
+    end
+
+    it "parses negation in field:value" do
+      should parse("!title:foo").as(
+        {:field => "title", :term => "foo", :prohibited => "!"}
+      )
+    end
+
     it "parses field:value" do
       should parse("title:foo").as(
         {:field => "title", :term => "foo"}

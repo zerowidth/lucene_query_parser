@@ -103,6 +103,7 @@ module LuceneQueryParser
     rule :unary_operator do
       str('+').as(:required) |
       str('-').as(:prohibited) |
+      str('!').as(:prohibited) |
       (str('NOT').as(:op) >> space)
     end
 
