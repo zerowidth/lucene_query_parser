@@ -75,7 +75,7 @@ module LuceneQueryParser
     end
 
     rule :group do
-      str('(') >> space.maybe >> expr.as(:group) >> space.maybe >> str(')')
+      str('(') >> space.maybe >> expr.as(:group) >> space.maybe >> str(')') >>
       boost.maybe
     end
 
