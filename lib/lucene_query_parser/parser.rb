@@ -132,7 +132,7 @@ module LuceneQueryParser
     end
 
     rule :space do
-      match["\n \t\u00a0"].repeat(1)
+      match["\n \t\u00a0\u200B"].repeat(1)
     end
 
   end
