@@ -74,6 +74,20 @@ describe LuceneQueryParser::Parser do
       )
     end
 
+    it "parses grouping side by side with space" do
+      should parse('(foo bar) (lorem ipsum)').as([
+        {:group => [{:term => "foo"}, {:term => "bar"}]},
+        {:group => [{:term => "lorem"}, {:term => "ipsum"}]}
+      ])
+    end
+
+    it "parses grouping side by side with no space" do
+      should parse('(foo bar)(lorem ipsum)').as([
+        {:group => [{:term => "foo"}, {:term => "bar"}]},
+        {:group => [{:term => "lorem"}, {:term => "ipsum"}]}
+      ])
+    end
+
     it "parses boosts in groupings" do
       should parse('(foo bar)^5').as(
         {:group => [{:term => "foo"}, {:term => "bar"}], :boost => "5"}

@@ -44,7 +44,7 @@ module LuceneQueryParser
 
     rule :expr do
       space.maybe >>
-      operand >> (space >> (operator >> space >> operand | operand)).repeat >>
+      operand >> (space.maybe >> (operator >> space.maybe >> operand | operand)).repeat >>
       space.maybe
     end
 
