@@ -70,10 +70,6 @@ module LuceneQueryParser
       (distance | boost).maybe
     end
 
-    rule :distance do
-      space.maybe >> str('~') >> match['0-9'].repeat(1).as(:distance)
-    end
-
     rule :group do
       str('(') >> space.maybe >> expr.as(:group) >> space.maybe >> str(')') >>
       boost.maybe
@@ -107,13 +103,17 @@ module LuceneQueryParser
       (str('NOT').as(:op) >> space)
     end
 
+    rule :distance do
+      space.maybe >> str('~') >> space.maybe >> match['0-9'].repeat(1).as(:distance)
+    end
+
     rule :fuzzy do
       space.maybe >> str('~') >>
       ( str('0.') >> match['0-9'].repeat(1) | match['01'] ).maybe.as(:similarity)
     end
 
     rule :boost do
-      space.maybe >> str('^') >> (
+      space.maybe >> str('^') >> space.maybe >> (
         str('0.') >> match['0-9'].repeat(1) |
         match['0-9'].repeat(1)
       ).as(:boost)

@@ -68,6 +68,12 @@ describe LuceneQueryParser::Parser do
       )
     end
 
+    it "parses a nearness query (even more forgiving)" do
+      should parse(%q("foo bar" ~ 2)).as(
+        {:phrase => "foo bar", :distance => "2"}
+      )
+    end
+
     it "parses a paren grouping" do
       should parse(%q((foo bar))).as(
         {:group => [{:term => "foo"}, {:term => "bar"}]}
@@ -96,6 +102,12 @@ describe LuceneQueryParser::Parser do
 
     it "parses boosts in groupings (forgiving)" do
       should parse('(foo bar) ^5').as(
+        {:group => [{:term => "foo"}, {:term => "bar"}], :boost => "5"}
+      )
+    end
+
+    it "parses boosts in groupings (even more forgiving)" do
+      should parse('(foo bar) ^ 5').as(
         {:group => [{:term => "foo"}, {:term => "bar"}], :boost => "5"}
       )
     end
