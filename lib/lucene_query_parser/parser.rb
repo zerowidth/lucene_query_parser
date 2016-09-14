@@ -29,7 +29,7 @@ module LuceneQueryParser
         # must define :term rule at run-time so that it can include
         # the term_re_str
         self.class.rule :term do
-          match[term_re_str].repeat(1).as(:term) >> (fuzzy | boost).maybe
+          ( (escape_special_words | match[term_re_str]).repeat(1) ).as(:term) >> (fuzzy | boost).maybe
         end
       else
         self.class.rule :term do
