@@ -62,9 +62,53 @@ describe LuceneQueryParser::Parser do
       )
     end
 
+    it "parses a nearness query (forgiving)" do
+      should parse(%q("foo bar" ~2)).as(
+        {:phrase => "foo bar", :distance => "2"}
+      )
+    end
+
+    it "parses a nearness query (even more forgiving)" do
+      should parse(%q("foo bar" ~ 2)).as(
+        {:phrase => "foo bar", :distance => "2"}
+      )
+    end
+
     it "parses a paren grouping" do
       should parse(%q((foo bar))).as(
         {:group => [{:term => "foo"}, {:term => "bar"}]}
+      )
+    end
+
+    it "parses grouping side by side with space" do
+      should parse('(foo bar) (lorem ipsum)').as([
+        {:group => [{:term => "foo"}, {:term => "bar"}]},
+        {:group => [{:term => "lorem"}, {:term => "ipsum"}]}
+      ])
+    end
+
+    it "parses grouping side by side with no space" do
+      should parse('(foo bar)(lorem ipsum)').as([
+        {:group => [{:term => "foo"}, {:term => "bar"}]},
+        {:group => [{:term => "lorem"}, {:term => "ipsum"}]}
+      ])
+    end
+
+    it "parses boosts in groupings" do
+      should parse('(foo bar)^5').as(
+        {:group => [{:term => "foo"}, {:term => "bar"}], :boost => "5"}
+      )
+    end
+
+    it "parses boosts in groupings (forgiving)" do
+      should parse('(foo bar) ^5').as(
+        {:group => [{:term => "foo"}, {:term => "bar"}], :boost => "5"}
+      )
+    end
+
+    it "parses boosts in groupings (even more forgiving)" do
+      should parse('(foo bar) ^ 5').as(
+        {:group => [{:term => "foo"}, {:term => "bar"}], :boost => "5"}
       )
     end
 
@@ -84,8 +128,30 @@ describe LuceneQueryParser::Parser do
       should parse("+foo").as({:term => "foo", :required => "+"})
     end
 
+    it "parses a required term (lenient)" do
+      should parse("+ foo").as({:term => "foo", :required => "+"})
+    end
+
+    it "parses a required term (lenient) v2" do
+      should parse("foo + bar").as([
+        {:term => "foo"},
+        {:term => "bar", :required => "+"}
+      ])
+    end
+
     it "parses a prohibited term" do
       should parse("-foo").as({:term => "foo", :prohibited => "-"})
+    end
+
+    it "parses a prohibited term (lenient)" do
+      should parse("- foo").as({:term => "foo", :prohibited => "-"})
+    end
+
+    it "parses a prohibited term (lenient) v2" do
+      should parse("foo - bar").as([
+        {:term => "foo"},
+        {:term => "bar", :prohibited => "-"}
+      ])
     end
 
     it "parses prohibited groups and phrases" do
@@ -114,6 +180,20 @@ describe LuceneQueryParser::Parser do
       ]
     end
 
+    it "parses && groupings" do
+      should parse(%q(foo && bar)).as [
+        {:term => "foo"},
+        {:op => "&&", :term => "bar"}
+      ]
+    end
+
+    it "parses || groupings" do
+      should parse(%q(foo || bar)).as [
+        {:term => "foo"},
+        {:op => "||", :term => "bar"}
+      ]
+    end
+
     it "parses a sequence of AND and OR" do
       should parse(%q(foo AND bar OR baz OR mumble)).as [
         {:term => "foo"},
@@ -128,6 +208,41 @@ describe LuceneQueryParser::Parser do
         {:term => "foo"},
         {:term => "bar", :op => "NOT"}
       ]
+    end
+
+    it "parses NOTs with a group" do
+      should parse("foo NOT (bar coca)").as [
+        {:term => "foo"},
+        {:group => [{:term => "bar"}, {:term => "coca"}], :op => "NOT"}
+      ]
+    end
+
+    it "parses negation in terms" do
+      should parse("foo !bar").as [
+        {:term => "foo"},
+        {:term => "bar", :prohibited => "!"}
+      ]
+    end
+
+    it "parses negation in groupings" do
+      should parse('!(foo bar)^5').as(
+        {:group => [{:term => "foo"}, {:term => "bar"}], :prohibited => "!", :boost => "5"}
+      )
+    end
+
+    it "parses negation in phrases" do
+      q = %q(!"foo bar" isn't one)
+      should parse(q).as [
+        {:phrase => "foo bar", :prohibited => "!"},
+        {:term => "isn't"},
+        {:term => "one"}
+      ]
+    end
+
+    it "parses negation in field:value" do
+      should parse("!title:foo").as(
+        {:field => "title", :term => "foo", :prohibited => "!"}
+      )
     end
 
     it "parses field:value" do
@@ -172,6 +287,18 @@ describe LuceneQueryParser::Parser do
     it "parses a fuzzy similarity of 0.8" do
       should parse('fuzzy~0.8').as(
         {:term => "fuzzy", :similarity => "0.8"}
+      )
+    end
+
+    it "parses a boost on phrase" do
+      should parse('"some phrase"^3').as(
+        {:phrase => "some phrase", :boost => "3"}
+      )
+    end
+
+    it "parses a boost on phrase (forgiving)" do
+      should parse('"some phrase" ^3').as(
+        {:phrase => "some phrase", :boost => "3"}
       )
     end
 
@@ -249,6 +376,12 @@ describe LuceneQueryParser::Parser do
       should parse('fo?').as( {:term => 'fo?'} )
     end
 
+    it "parses non-breaking space" do
+      should parse("foo bar").as [ # do not be fooled, there is a non-breaking space between foo and bar
+        {:term => "foo"},
+        {:term => "bar"},
+      ]
+    end
   end
 
   describe "#error_location" do

@@ -29,7 +29,7 @@ module LuceneQueryParser
         # must define :term rule at run-time so that it can include
         # the term_re_str
         self.class.rule :term do
-          match[term_re_str].repeat(1).as(:term) >> (fuzzy | boost).maybe
+          ( (escape_special_words | match[term_re_str]).repeat(1) ).as(:term) >> (fuzzy | boost).maybe
         end
       else
         self.class.rule :term do
@@ -44,16 +44,16 @@ module LuceneQueryParser
 
     rule :expr do
       space.maybe >>
-      operand >> (space >> (operator >> space >> operand | operand)).repeat >>
+      operand >> (space.maybe >> (operator >> space.maybe >> operand | operand)).repeat >>
       space.maybe
     end
 
     rule :operator do
-      str('AND').as(:op) | str('OR').as(:op)
+      str('AND').as(:op) | str('OR').as(:op) | str('&&').as(:op) | str('||').as(:op)
     end
 
     rule :operand do
-      unary_operator.maybe >> (
+      unary_operator.maybe >> space.maybe >> (
         group |
         field |
         term |
@@ -70,12 +70,9 @@ module LuceneQueryParser
       (distance | boost).maybe
     end
 
-    rule :distance do
-      str('~') >> match['0-9'].repeat(1).as(:distance)
-    end
-
     rule :group do
-      str('(') >> space.maybe >> expr.as(:group) >> space.maybe >> str(')')
+      str('(') >> space.maybe >> expr.as(:group) >> space.maybe >> str(')') >>
+      boost.maybe
     end
 
     rule :field do
@@ -102,16 +99,21 @@ module LuceneQueryParser
     rule :unary_operator do
       str('+').as(:required) |
       str('-').as(:prohibited) |
+      str('!').as(:prohibited) |
       (str('NOT').as(:op) >> space)
     end
 
+    rule :distance do
+      space.maybe >> str('~') >> space.maybe >> match['0-9'].repeat(1).as(:distance)
+    end
+
     rule :fuzzy do
-      str('~') >>
+      space.maybe >> str('~') >>
       ( str('0.') >> match['0-9'].repeat(1) | match['01'] ).maybe.as(:similarity)
     end
 
     rule :boost do
-      str('^') >> (
+      space.maybe >> str('^') >> space.maybe >> (
         str('0.') >> match['0-9'].repeat(1) |
         match['0-9'].repeat(1)
       ).as(:boost)
@@ -130,7 +132,7 @@ module LuceneQueryParser
     end
 
     rule :space do
-      match["\n \t"].repeat(1)
+      match["\n \t\u00a0\u200B"].repeat(1)
     end
 
   end
