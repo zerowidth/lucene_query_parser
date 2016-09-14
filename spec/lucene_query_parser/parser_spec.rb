@@ -128,8 +128,30 @@ describe LuceneQueryParser::Parser do
       should parse("+foo").as({:term => "foo", :required => "+"})
     end
 
+    it "parses a required term (lenient)" do
+      should parse("+ foo").as({:term => "foo", :required => "+"})
+    end
+
+    it "parses a required term (lenient) v2" do
+      should parse("foo + bar").as([
+        {:term => "foo"},
+        {:term => "bar", :required => "+"}
+      ])
+    end
+
     it "parses a prohibited term" do
       should parse("-foo").as({:term => "foo", :prohibited => "-"})
+    end
+
+    it "parses a prohibited term (lenient)" do
+      should parse("- foo").as({:term => "foo", :prohibited => "-"})
+    end
+
+    it "parses a prohibited term (lenient) v2" do
+      should parse("foo - bar").as([
+        {:term => "foo"},
+        {:term => "bar", :prohibited => "-"}
+      ])
     end
 
     it "parses prohibited groups and phrases" do

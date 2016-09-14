@@ -53,7 +53,7 @@ module LuceneQueryParser
     end
 
     rule :operand do
-      unary_operator.maybe >> (
+      unary_operator.maybe >> space.maybe >> (
         group |
         field |
         term |
