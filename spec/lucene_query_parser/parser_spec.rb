@@ -146,6 +146,20 @@ describe LuceneQueryParser::Parser do
       ]
     end
 
+    it "parses && groupings" do
+      should parse(%q(foo && bar)).as [
+        {:term => "foo"},
+        {:op => "&&", :term => "bar"}
+      ]
+    end
+
+    it "parses || groupings" do
+      should parse(%q(foo || bar)).as [
+        {:term => "foo"},
+        {:op => "||", :term => "bar"}
+      ]
+    end
+
     it "parses a sequence of AND and OR" do
       should parse(%q(foo AND bar OR baz OR mumble)).as [
         {:term => "foo"},

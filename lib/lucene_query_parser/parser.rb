@@ -49,7 +49,7 @@ module LuceneQueryParser
     end
 
     rule :operator do
-      str('AND').as(:op) | str('OR').as(:op)
+      str('AND').as(:op) | str('OR').as(:op) | str('&&').as(:op) | str('||').as(:op)
     end
 
     rule :operand do
