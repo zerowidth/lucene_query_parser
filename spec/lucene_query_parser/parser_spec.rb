@@ -162,6 +162,13 @@ describe LuceneQueryParser::Parser do
       ]
     end
 
+    it "parses NOTs with a group" do
+      should parse("foo NOT (bar coca)").as [
+        {:term => "foo"},
+        {:group => [{:term => "bar"}, {:term => "coca"}], :op => "NOT"}
+      ]
+    end
+
     it "parses negation in terms" do
       should parse("foo !bar").as [
         {:term => "foo"},
@@ -321,6 +328,12 @@ describe LuceneQueryParser::Parser do
       should parse('fo?').as( {:term => 'fo?'} )
     end
 
+    it "parses non-breaking space" do
+      should parse("foo bar").as [ # do not be fooled, there is a non-breaking space between foo and bar
+        {:term => "foo"},
+        {:term => "bar"},
+      ]
+    end
   end
 
   describe "#error_location" do
