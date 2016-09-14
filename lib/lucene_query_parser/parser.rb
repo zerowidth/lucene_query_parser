@@ -71,7 +71,7 @@ module LuceneQueryParser
     end
 
     rule :distance do
-      str('~') >> match['0-9'].repeat(1).as(:distance)
+      space.maybe >> str('~') >> match['0-9'].repeat(1).as(:distance)
     end
 
     rule :group do
@@ -107,12 +107,12 @@ module LuceneQueryParser
     end
 
     rule :fuzzy do
-      str('~') >>
+      space.maybe >> str('~') >>
       ( str('0.') >> match['0-9'].repeat(1) | match['01'] ).maybe.as(:similarity)
     end
 
     rule :boost do
-      str('^') >> (
+      space.maybe >> str('^') >> (
         str('0.') >> match['0-9'].repeat(1) |
         match['0-9'].repeat(1)
       ).as(:boost)
